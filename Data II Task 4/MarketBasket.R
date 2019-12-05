@@ -19,9 +19,26 @@ itemLabels(Transactions)# To see the item labels
 summary(Transactions)
 
 #Visualize dataset
-itemFrequencyPlot(Transactions)
+itemFrequencyPlot(Transactions, support=relative)
 image(Transactions)
-image(sample(Transactions))
+image(sample(Transactions)) #add more things to this badboy
 
 
+#Association rules
+rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.5))
+rules
 
+
+inspect(rules) #takes forever-created + 400 000 rules
+inspect(head(rules, n = 3, by ="lift"))
+
+#Plot rules
+
+head(quality(rules))
+
+
+plot(rules, measure = c("support", "lift"), shading = "confidence")
+plot(rules, method = "two-key plot")
+
+
+     
