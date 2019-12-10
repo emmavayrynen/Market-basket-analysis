@@ -3,19 +3,24 @@
 #Set library
 library(arules)
 library(arulesViz) 
-
+library(ggplot2)
+library(dplyr)
 
 #Upload data and set seed + set number of displayed significant
 Transactions<- read.transactions("ElectronidexTransactions2017.csv",format = "basket", 
                                  sep = ",", rm.duplicates = TRUE)
 Transactions
+
 set.seed(123)
 options(digits = 2)
+
+# Upload the product category data
 productCategory <- read.csv("ProductCategories.csv")
 productCategory<- as.data.frame(productCategory)
 
 
 #Inspect dataset
+
 inspect(Transactions)
 length (Transactions) # Number of transactions.
 size(Transactions) # Number of items per transaction
@@ -43,34 +48,55 @@ blackwellProductTypes <- data.frame(blackwellProductTypes$ProductType, blackwell
 View(blackwellProductTypes)
 
 blackwellProductTypes$Company <- "Blackwell"
-colnames(blackwellProductTypes)[1] <- "ProductType"
+colnames(blackwellProductTypes)[1] <- "Category"
 colnames(blackwellProductTypes)[2] <- "Product"
 
+
+# Prepare Electronidex product data 
+
+productCategory$Company <- "Electronidex"
+
+# Merge dataframes
+
+ProductTypes <- rbind(productCategory, blackwellProductTypes)
+
+# Visually compare Blackwell and Electronidex product offering 
+
+ggplot(tally(group_by(ProductTypes, Category, Company)),aes(Category, n, fill = Category)) + 
+  geom_col() + facet_grid(Company ~ .) + theme(axis.text.x = element_text(angle = 90, hjust = 1, size =15))+
+  guides(fill=FALSE) + xlab("Products") + ylab("Count") + 
+  ggtitle("Visual Representation of Product Offering between BW and EN")
 
 # Adding the labels
 Transactions@itemInfo$category <- productCategory$Category
 
 
-# TOP 10 most frequent products
-itemFrequencyPlot(Transactions, topN = 10, col = rainbow(4), type="absolute")
+# TOP 10 most frequent products by product
+
+itemFrequencyPlot(Transactions, topN = 20, col = rainbow(4), type="absolute")
 head(Transactions@itemInfo)
 
-#Association rules
-rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.8))
+# Plot frequency categories 
+
+ggplot(productCategory, aes(Category, fill=Category)) + geom_bar()+coord_flip()
+
+# Association rules
+rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.4))
 rules
 
-
-#Association rules
-rules <- apriori(Transactions, parameter=list(minlen=2)(support=0.001, confidence=0.5))
-rules
-inspect(rules) #takes forever-created + 400 000 rules
+inspect(rules)
 inspect(head(rules, n = 3, by ="lift"))
-head(quality(rules))
 
+# Plot rules
 
-#Plot rules
-plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
+plot(rules, measure = c("support", "lift"), shading = "confidence")
 plot(rules, method = "two-key plot")
+
+# Remove redundant rules
+rules_nonRedundant <- rules[!is.redundant(rules)]
+summary(rules_nonRedundant)
+inspect(head(rules_nonRedundant,n=5,by="lift"))  
+
 
 #Sorting association
 top.support <- sort(rules, decreasing = TRUE, na.last = NA, by = "support")
@@ -89,3 +115,4 @@ inspect(top.ten.confidence)
 
 #Improve and subset model
 inspect(sort(Transactions, by = "Type of Measurement"))
+
