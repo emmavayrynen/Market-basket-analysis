@@ -33,14 +33,13 @@ Transactions@itemInfo <- productCategory
 # TOP 10 most frequent products
 itemFrequencyPlot(Transactions, topN = 10, col = rainbow(4), type="absolute")
 
+
+
 #Association rules
-rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.5))
+rules <- apriori(Transactions, parameter=list(minlen=2)(support=0.001, confidence=0.5))
 rules
-
-
 inspect(rules) #takes forever-created + 400 000 rules
 inspect(head(rules, n = 3, by ="lift"))
-
 head(quality(rules))
 
 
@@ -57,9 +56,11 @@ top.confidence <- sort(rules, decreasing = TRUE, na.last = NA, by = "confidence"
 top.ten.confidence <- sort.list(top.support,partial=10)
 inspect(top.ten.confidence)
 
-rules2 <- apriori(Adult, parameter=list(supp = 0.5, conf = 0.8), appearance = income)
+#?rules2 <- apriori(Transactions, parameter=list(supp = 0.5, conf = 0.8), appearance = income)
 
-top.lift <- sort(rules2, decreasing = TRUE, na.last = NA, by = "lift")
-top.ten.lift <- sort.list(top.lift, partial=10)
-inspect(top.ten.lift)
-     
+#top.lift <- sort(rules2, decreasing = TRUE, na.last = NA, by = "lift")
+#top.ten.lift <- sort.list(top.lift, partial=10)
+#inspect(top.ten.lift)
+
+#Improve and subset model
+inspect(sort(Transactions, by = "Type of Measurement"))
