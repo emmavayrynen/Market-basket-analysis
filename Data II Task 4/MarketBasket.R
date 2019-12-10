@@ -41,13 +41,25 @@ rules
 inspect(rules) #takes forever-created + 400 000 rules
 inspect(head(rules, n = 3, by ="lift"))
 
-#Plot rules
-
 head(quality(rules))
 
 
-plot(rules, measure = c("support", "lift"), shading = "confidence")
+#Plot rules
+plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
 plot(rules, method = "two-key plot")
 
+#Sorting association
+top.support <- sort(rules, decreasing = TRUE, na.last = NA, by = "support")
+top.ten.support <- sort.list(top.support, partial=10)
+inspect(top.ten.support)
 
+top.confidence <- sort(rules, decreasing = TRUE, na.last = NA, by = "confidence")
+top.ten.confidence <- sort.list(top.support,partial=10)
+inspect(top.ten.confidence)
+
+rules2 <- apriori(Adult, parameter=list(supp = 0.5, conf = 0.8), appearance = income)
+
+top.lift <- sort(rules2, decreasing = TRUE, na.last = NA, by = "lift")
+top.ten.lift <- sort.list(top.lift, partial=10)
+inspect(top.ten.lift)
      
