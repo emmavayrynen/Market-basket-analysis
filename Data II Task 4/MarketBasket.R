@@ -9,6 +9,8 @@ library(arulesViz)
 Transactions<- read.transactions("ElectronidexTransactions2017.csv")
 set.seed(123)
 options(digits = 2)
+productCategory <- read.csv("ProductCategories.csv")
+productCategory<- as.data.frame(productCategory)
 
 #Inspect dataset
 inspect(Transactions)
@@ -17,12 +19,19 @@ size(Transactions) # Number of items per transaction
 LIST(Transactions) # Lists the transactions by conversion
 itemLabels(Transactions)# To see the item labels
 summary(Transactions)
+head(Transactions@itemInfo)
 
 #Visualize dataset
 itemFrequencyPlot(Transactions, support=relative)
 image(Transactions)
 image(sample(Transactions)) #add more things to this badboy
 
+# Adding the labels
+Transactions@itemInfo <- productCategory
+
+
+# TOP 10 most frequent products
+itemFrequencyPlot(Transactions, topN = 10, col = rainbow(4), type="absolute")
 
 #Association rules
 rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.5))
