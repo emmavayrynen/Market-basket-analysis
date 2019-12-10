@@ -3,11 +3,13 @@
 #Set library
 library(arules)
 library(arulesViz) 
-
+library(plyr)
+library(ggplot2)
 
 #Upload data and set seed + set number of displayed significant
 Transactions<- read.transactions("ElectronidexTransactions2017.csv",format = "basket", 
                                  sep = ",", rm.duplicates = TRUE)
+Transactions <-as(Transactions, "transactions")
 Transactions
 set.seed(123)
 options(digits = 2)
@@ -25,7 +27,7 @@ summary(Transactions)
 
 
 #Visualize dataset
-itemFrequencyPlot(Transactions, support=relative)
+itemFrequencyPlot(Transactions,topN=10, type="absolute")
 image(Transactions)
 image(sample(Transactions)) #add more things to this badboy
 ncol(Transactions)
@@ -59,33 +61,21 @@ head(Transactions@itemInfo)
 rules <- apriori(Transactions, parameter=list(support=0.001, confidence=0.8))
 rules
 
-
-#Association rules
-rules <- apriori(Transactions, parameter=list(minlen=2)(support=0.001, confidence=0.5))
-rules
-inspect(rules) #takes forever-created + 400 000 rules
+inspect(rules) 
 inspect(head(rules, n = 3, by ="lift"))
 head(quality(rules))
+
+
+#Top 10 rules
+inspect(rules[1:10])
+top.rules <-inspect(rules[1:10])
 
 
 #Plot rules
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
 plot(rules, method = "two-key plot")
+plot (top.rules, method ="grouped")
 
-#Sorting association
-top.support <- sort(rules, decreasing = TRUE, na.last = NA, by = "support")
-top.ten.support <- sort.list(top.support, partial=10)
-inspect(top.ten.support)
-
-top.confidence <- sort(rules, decreasing = TRUE, na.last = NA, by = "confidence")
-top.ten.confidence <- sort.list(top.support,partial=10)
-inspect(top.ten.confidence)
-
-#?rules2 <- apriori(Transactions, parameter=list(supp = 0.5, conf = 0.8), appearance = income)
-
-#top.lift <- sort(rules2, decreasing = TRUE, na.last = NA, by = "lift")
-#top.ten.lift <- sort.list(top.lift, partial=10)
-#inspect(top.ten.lift)
 
 #Improve and subset model
-inspect(sort(Transactions, by = "Type of Measurement"))
+inspect(sort(Transactions, by = "support"))
