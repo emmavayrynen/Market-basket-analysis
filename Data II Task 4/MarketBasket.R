@@ -1,6 +1,6 @@
 #DISCOVER ASSOCIATIONS BETWEEN PRODUCTS
 
-# lLoad libraries
+# Load libraries
 if(require("pacman")=="FALSE"){
   install.packages("pacman")
 }
@@ -89,7 +89,7 @@ ggplot(transactionSize,aes(size.Transactions.))+
       geom_bar(fill="red")+
       labs(title = "Size of transactions")
 
-
+#Split 
 
 
 ################################################
@@ -126,13 +126,14 @@ inspect(head(top.rules, by = "support"))
 
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
 plot(rules, method = "two-key plot")
+plot(top.rules, method = "grouped")
 plot (top.rules, method = "graph", engine = "htmlwidget")
 
 
 #Improve by inspect model
-inspect(sort(Transactions, by = "support"))
-inspect(sort(Transactions, by = "confidence"))
-inspect(sort(Transactions, by = "lift"))
+inspect(sort(rules [1:10], by = "support"))
+inspect(sort(rules[1:10], by = "confidence"))
+inspect(sort(rules[1:10], by = "lift"))
 
 
 #Improve and subset model
@@ -207,6 +208,18 @@ ggplot(transactionSize,aes(x="",fill=customerType))+
 ##########################################################
 ###             Rules by Category                       ##
 ##########################################################
+rulesCat <- apriori(Data_catsplit, parameter=list(minlen=2, support=0.001, confidence=0.4))
+TopRulesCat<-inspect(rulesCat[1:10])
+
+rulesCat1 <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2), 
+          appearance = list(default="rhs",lhs="Laptop"))
+topTenCat<-rulesCat1[1:10]
+inspect(head(rulesCat1, by="lift"))
+
+plotCat <-(head(rulesCat1, by="lift"))
+
+plot(plotCat, method = "graph", engine = "htmlwidget")
+
 
 
 ##########################################################
