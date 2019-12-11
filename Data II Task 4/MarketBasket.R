@@ -35,7 +35,7 @@ summary(Transactions)
 itemFrequencyPlot(Transactions,topN=10, type="absolute")
 image(Transactions)
 image(sample(Transactions))
-ncol(Transactions)
+
 
 ### Compare Blackwell and Electronidex product offering
 
@@ -74,34 +74,69 @@ Transactions@itemInfo$category <- productCategory$Category
 
 # TOP 10 most frequent products by product
 
-itemFrequencyPlot(Transactions, topN = 20, col = rainbow(4), type="absolute")
+itemFrequencyPlot(Transactions, topN = 10, col = rainbow(4), type="absolute")
 head(Transactions@itemInfo)
 
 # Plot frequency categories 
 inspect(rules) 
 ggplot(productCategory, aes(Category, fill=Category)) + geom_bar()+coord_flip()
 
+################################################
+##                 Association rules         ##
+################################################
 
-# Association rules
+
 rules <- apriori(Transactions, parameter=list(minlen=2, support=0.001, confidence=0.4))
-rules
 inspect(head(rules, n = 3, by ="lift"))
 
 
 #Top 10 rules
+
 inspect(rules[1:10])
-top.rules <-inspect(rules[1:10])
+top.rules <-rules[1:10]
 
 
 #Plot rules
+
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
 plot(rules, measure = c("support", "lift"), shading = "confidence")
 plot(rules, method = "two-key plot")
-plot (top.rules, method ="grouped")
+plot (top.rules, method = "graph", engine = "htmlwidget")
 
 
 #Improve and subset model
-inspect(sort(Transactions, by = "support"))
+
+inspect(sort(top.rules, by = "lift"))
+is.redundant(top.rules)
+
+##########################################
+# #        RULES BY PRODUCTS ON LHS      ##
+##########################################
+
+
+# iMac Rules
+
+iMacrules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
+               appearance = list(default="rhs",lhs="iMac"))
+inspect(iMacrules)
+plot (iMacrules, method = "graph", engine = "htmlwidget")
+
+# HP laptop rules
+
+hpLaptoprules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
+                   appearance = list(default="rhs",lhs="HP Laptop"))
+inspect(hpLaptoprules)
+plot (hpLaptoprules, method = "graph", engine = "htmlwidget")
+
+# CYBERPOWER Gamer Desktop Rules
+
+CPGamingLaptoprules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
+                       appearance = list(default="rhs",lhs="CYBERPOWER Gamer Desktop"))
+inspect(CPGamingLaptoprules)
+plot (CPGamingLaptoprules, method = "scatterplot", engine = "htmlwidget")
+
+
+############################################################3
 
 # Remove redundant rules
 rules_nonRedundant <- rules[!is.redundant(rules)]
