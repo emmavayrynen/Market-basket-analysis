@@ -58,6 +58,7 @@ productCategory$Company <- "Electronidex"
 
 ProductTypes <- rbind(productCategory, blackwellProductTypes)
 
+
 # Visually compare Blackwell and Electronidex product offering 
 
 ggplot(tally(group_by(ProductTypes, Category, Company)),aes(Category, n, fill = Category)) + 
@@ -84,28 +85,42 @@ ggplot(transactionSize,aes(size.Transactions.))+
       geom_bar(fill="red")+
       labs(title = "Size of transactions")
 
+
+
+
 ################################################
 ##                 Association rules         ##
 ################################################
 
 
 rules <- apriori(Transactions, parameter=list(minlen=2, support=0.001, confidence=0.4))
+rules
+inspect(head(rules, n = 10, by ="lift"))
 inspect(head(rules, n = 3, by ="lift"))
 is.redundant(rules)
 rules <- rules[!is.redundant(rules)]
 
+
 #Top 10 rules
 
 inspect(rules[1:10])
-top.rules <-rules[1:10]
+top.rules <-(rules[1:10])
+inspect(head(top.rules, by = "confidence"))
+inspect(head(top.rules, by = "lift"))
+inspect(head(top.rules, by = "support"))
 
 
 #Plot rules
 
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
-plot(rules, measure = c("support", "lift"), shading = "confidence")
 plot(rules, method = "two-key plot")
 plot (top.rules, method = "graph", engine = "htmlwidget")
+
+
+#Improve by inspect model
+inspect(sort(Transactions, by = "support"))
+inspect(sort(Transactions, by = "confidence"))
+inspect(sort(Transactions, by = "lift"))
 
 
 #Improve and subset model
