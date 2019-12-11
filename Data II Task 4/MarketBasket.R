@@ -1,25 +1,20 @@
 #DISCOVER ASSOCIATIONS BETWEEN PRODUCTS
 
-#Set library
-library(arules)
-library(arulesViz) 
-library(ggplot2)
-library(dplyr)
+# lLoad libraries
+if(require("pacman")=="FALSE"){
+  install.packages("pacman")
+}
+pacman::p_load("readr","ggplot2","arules","arulesViz","plotly","RColorBrewer","dplyr")
 
-
-#Upload data and set seed + set number of displayed significant
+# Upload data and set seed + set number of displayed significant
 Transactions<- read.transactions("ElectronidexTransactions2017.csv",format = "basket", 
                                  sep = ",", rm.duplicates = TRUE)
-Transactions <-as(Transactions, "transactions")
-Transactions
-
 set.seed(123)
 options(digits = 2)
 
 # Upload the product category data
 productCategory <- read.csv("ProductCategories.csv")
 productCategory<- as.data.frame(productCategory)
-
 
 #Inspect dataset
 
@@ -36,8 +31,10 @@ itemFrequencyPlot(Transactions,topN=10, type="absolute")
 image(Transactions)
 image(sample(Transactions))
 
+##########################################################
+##   Compare Blackwell and Electronidex portofolio      ##
+##########################################################
 
-### Compare Blackwell and Electronidex product offering
 
 # Prepare Blackwell product data
 blackwellNew <- read.csv("blackwellNew.csv")
@@ -68,6 +65,8 @@ ggplot(tally(group_by(ProductTypes, Category, Company)),aes(Category, n, fill = 
   guides(fill=FALSE) + xlab("Products") + ylab("Count") + 
   ggtitle("Visual Representation of Product Offering between BW and EN")
 
+#########################################################################################
+
 # Adding the labels
 Transactions@itemInfo$category <- productCategory$Category
 
@@ -77,9 +76,13 @@ Transactions@itemInfo$category <- productCategory$Category
 itemFrequencyPlot(Transactions, topN = 10, col = rainbow(4), type="absolute")
 head(Transactions@itemInfo)
 
-# Plot frequency categories 
-inspect(rules) 
-ggplot(productCategory, aes(Category, fill=Category)) + geom_bar()+coord_flip()
+# Plot nr items in a transaction
+
+transactionSize <- data.frame(size(Transactions))
+
+ggplot(transactionSize,aes(size.Transactions.))+
+      geom_bar(fill="red")+
+      labs(title = "Size of transactions")
 
 ################################################
 ##                 Association rules         ##
@@ -88,7 +91,8 @@ ggplot(productCategory, aes(Category, fill=Category)) + geom_bar()+coord_flip()
 
 rules <- apriori(Transactions, parameter=list(minlen=2, support=0.001, confidence=0.4))
 inspect(head(rules, n = 3, by ="lift"))
-
+is.redundant(rules)
+rules <- rules[!is.redundant(rules)]
 
 #Top 10 rules
 
@@ -107,7 +111,7 @@ plot (top.rules, method = "graph", engine = "htmlwidget")
 #Improve and subset model
 
 inspect(sort(top.rules, by = "lift"))
-is.redundant(top.rules)
+is.redundant(top.rules) #no redundant rules
 
 ##########################################
 # #        RULES BY PRODUCTS ON LHS      ##
@@ -136,11 +140,22 @@ inspect(CPGamingLaptoprules)
 plot (CPGamingLaptoprules, method = "scatterplot", engine = "htmlwidget")
 
 
-############################################################3
 
-# Remove redundant rules
-rules_nonRedundant <- rules[!is.redundant(rules)]
-summary(rules_nonRedundant)
-inspect(head(rules_nonRedundant,n=5,by="lift"))  
+#########################################################
+##          Split data by categories                   ##
+#########################################################
 
+Data_catsplit <- aggregate(Transactions, by = 'category')
+itemLabels(Data_catsplit)
+library(RColorBrewer)
+
+# Plotting frequency by category
+
+itemFrequencyPlot(Data_catsplit, topN = 10, type = "relative", 
+                             col = colorRampPalette(brewer.pal(9, "Paired"))(10), 
+                             main = "Categories Relative Item Frequency Plot")
+
+##########################################################
+###             Rules by Category                       ##
+##########################################################
 
