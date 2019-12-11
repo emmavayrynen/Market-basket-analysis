@@ -31,6 +31,10 @@ itemFrequencyPlot(Transactions,topN=10, type="absolute")
 image(Transactions)
 image(sample(Transactions))
 
+# Removing transaction size 0
+
+Transactions <-Transactions[which(size(Transactions)!=0)]
+
 ##########################################################
 ##   Compare Blackwell and Electronidex portofolio      ##
 ##########################################################
@@ -89,7 +93,7 @@ ggplot(transactionSize,aes(size.Transactions.))+
 
 
 ################################################
-##                 Association rules         ##
+##          Association rules                  ##
 ################################################
 
 
@@ -99,6 +103,14 @@ inspect(head(rules, n = 10, by ="lift"))
 inspect(head(rules, n = 3, by ="lift"))
 is.redundant(rules)
 rules <- rules[!is.redundant(rules)]
+nrow(Transactions)
+
+#Rules without laptops,desktops and computers
+
+`%!in%` = Negate(`%in%`)
+NoLaptopRules <- subset(rules,items %!in% c("iMac","HP Laptop", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                            "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop"))
+inspect(NoLaptopRules[1:10])
 
 
 #Top 10 rules
@@ -155,6 +167,10 @@ inspect(CPGamingLaptoprules)
 plot (CPGamingLaptoprules, method = "scatterplot", engine = "htmlwidget")
 
 
+# Rules without laptops
+
+rulesNoLaptops <- apriori(Transactions, parameter=list(supp=0.001,conf = 0.2),
+                          appearance = items %in% "CYBERPOWER Gamer Desktop")
 
 #########################################################
 ##          Split data by categories                   ##
@@ -170,7 +186,30 @@ itemFrequencyPlot(Data_catsplit, topN = 10, type = "relative",
                              col = colorRampPalette(brewer.pal(9, "Paired"))(10), 
                              main = "Categories Relative Item Frequency Plot")
 
+
+
+###########################################################
+##                Split Data by B2B AND B2C            ####
+###########################################################
+
+transactions_B2C <- Transactions[which(size(Transactions)<=4)] #B3B Transactions
+transactions_B2B <- Transactions[which(size(Transactions)>4)]  #B2C Transactions
+transactions_oneItem <- Transactions[which(size(Transactions)==1)] #Transactions with only one item
+
+# Piechart proportion of customers that are individuals or businesses
+
+transactionSize$customerType <- ifelse(transactionSize$size.Transactions.>4, transactionSize$customerType <- "Business", transactionSize$customerType <- "Private" )
+
+ggplot(transactionSize,aes(x="",fill=customerType))+
+      geom_bar()+
+      coord_polar(theta = "y")
+
 ##########################################################
 ###             Rules by Category                       ##
+##########################################################
+
+
+##########################################################
+###             Rules by Type of Customer               ##
 ##########################################################
 
