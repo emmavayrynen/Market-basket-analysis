@@ -10,7 +10,7 @@ library(dplyr)
 #Upload data and set seed + set number of displayed significant
 Transactions<- read.transactions("ElectronidexTransactions2017.csv",format = "basket", 
                                  sep = ",", rm.duplicates = TRUE)
-Transactions <-as(Transactions, "transactions")
+#Transactions <-as(Transactions, "transactions")
 Transactions
 
 set.seed(123)
@@ -85,23 +85,33 @@ ggplot(productCategory, aes(Category, fill=Category)) + geom_bar()+coord_flip()
 # Association rules
 rules <- apriori(Transactions, parameter=list(minlen=2, support=0.001, confidence=0.4))
 rules
-inspect(head(rules, n = 3, by ="lift"))
+inspect(head(rules, n = 10, by ="lift"))
 
 
 #Top 10 rules
 inspect(rules[1:10])
-top.rules <-inspect(rules[1:10])
+top.rules <-(rules[1:10])
+inspect(head(top.rules, by = "confidence"))
+inspect(head(top.rules, by = "lift"))
+inspect(head(top.rules, by = "support"))
 
 
 #Plot rules
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
-plot(rules, measure = c("support", "lift"), shading = "confidence")
 plot(rules, method = "two-key plot")
 plot (top.rules, method ="grouped")
 
 
-#Improve and subset model
+#Improve by inspect model
 inspect(sort(Transactions, by = "support"))
+inspect(sort(Transactions, by = "confidence"))
+inspect(sort(Transactions, by = "lift"))
+
+#Subsetting iMac &
+iMacRules <- subset(rules, items %in% "iMac")
+inspect(head(iMacRules[1:10]))
+
+
 
 # Remove redundant rules
 rules_nonRedundant <- rules[!is.redundant(rules)]
