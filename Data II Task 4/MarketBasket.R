@@ -91,8 +91,6 @@ ggplot(transactionSize,aes(size.Transactions.))+
       geom_bar(fill="red")+
       labs(title = "Size of transactions")
 
-#Split 
-
 
 ################################################
 ##          Association rules                  ##
@@ -228,6 +226,14 @@ plotCat <-(head(rulesCat1, by="lift"))
 
 plot(plotCat, method = "graph", engine = "htmlwidget")
 
+#Desktop
+rulesCat3 <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2), 
+                    appearance = list(default="rhs",lhs="Desktop"))
+topTenDesk<-rulesCat3[1:10]
+plotDesk<-(head(rulesCat3, by ="lift"))
+
+plot(plotDesk, method = "graph", engine = "htmlwidget")
+
 #Printer Ink
 rulesCatPrint <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2), 
                     appearance = list(default="lhs",rhs="Printer Ink"))
@@ -244,6 +250,8 @@ plot(topTenPrint, method="grouped")
 
 rule_B2B <- apriori(transactions_B2B, parameter=list(supp=0.02,conf = 0.2) )
 inspect(rule_B2B)
+topTenB2B<-(rule_B2B [1:10])
+inspect(head(topTenB2B, by="lift"))
 
 # Rules no Laptops, desktops and computers
 
@@ -251,12 +259,16 @@ rule_B2BnoLaptops <- subset(rule_B2B,items %!in% c("iMac","HP Laptop", "Apple Ma
                                                    "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
                                                    "Acer Desktop","Apple MacBook Pro","HP Monitor"))
 inspect(rule_B2BnoLaptops)
+inspect(rule_B2B)
+topTenNoLap<-(rule_B2BnoLaptops [1:10])
+inspect(head(topTenNoLap, by="lift"))
 
 #Rule Apple Earpods B2B
 
 rule_B2BappleEarpods <- apriori(transactions_B2B,parameter=list(supp=0.002,conf = 0.2), 
                                 appearance = list(default="rhs",lhs="Apple Earpods"))
 inspect(rule_B2BappleEarpods)
+inspect(head(rule_B2BappleEarpods[1:10], by="lift"))
 
 # Rule B2B iMac
 
@@ -267,7 +279,8 @@ inspect(rule_B2BiMac)
 ### Rules B2C ###
 
 rule_B2C <- apriori(transactions_B2C, parameter=list(supp=0.005,conf = 0.1) )
-inspect(rule_B2C)
+inspect(head(rule_B2C[1:10], by="lift"))
+
 
 # Rules no Laptops, desktops and computers
 
@@ -280,7 +293,7 @@ inspect(rule_B2CnoLaptops)
 
 rule_B2CappleEarpods <- apriori(transactions_B2C,parameter=list(supp=0.001,conf = 0.1), 
                                 appearance = list(default="rhs",lhs="Apple Earpods"))
-inspect(rule_B2CappleEarpods)
+inspect(rule_B2CappleEarpods, by ="lift")
 
 # Rule iMac B2C
 
