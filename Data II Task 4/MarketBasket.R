@@ -240,3 +240,52 @@ plot(topTenPrint, method="grouped")
 ###             Rules by Type of Customer               ##
 ##########################################################
 
+### Rules B2B ###
+
+rule_B2B <- apriori(transactions_B2B, parameter=list(supp=0.02,conf = 0.2) )
+inspect(rule_B2B)
+
+# Rules no Laptops, desktops and computers
+
+rule_B2BnoLaptops <- subset(rule_B2B,items %!in% c("iMac","HP Laptop", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                                   "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
+                                                   "Acer Desktop","Apple MacBook Pro","HP Monitor"))
+inspect(rule_B2BnoLaptops)
+
+#Rule Apple Earpods B2B
+
+rule_B2BappleEarpods <- apriori(transactions_B2B,parameter=list(supp=0.002,conf = 0.2), 
+                                appearance = list(default="rhs",lhs="Apple Earpods"))
+inspect(rule_B2BappleEarpods)
+
+# Rule B2B iMac
+
+rule_B2BiMac <- apriori(transactions_B2B,parameter=list(supp=0.002,conf = 0.2), 
+            appearance = list(default="rhs",lhs="iMac"))
+inspect(rule_B2BiMac)
+
+### Rules B2C ###
+
+rule_B2C <- apriori(transactions_B2C, parameter=list(supp=0.005,conf = 0.1) )
+inspect(rule_B2C)
+
+# Rules no Laptops, desktops and computers
+
+rule_B2CnoLaptops <- subset(rule_B2C,items %!in% c("iMac","HP Laptop", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                                   "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
+                                                   "Acer Desktop","Apple MacBook Pro","HP Monitor"))
+inspect(rule_B2CnoLaptops)
+
+#Rule Apple Earpods B2B
+
+rule_B2CappleEarpods <- apriori(transactions_B2C,parameter=list(supp=0.001,conf = 0.1), 
+                                appearance = list(default="rhs",lhs="Apple Earpods"))
+inspect(rule_B2CappleEarpods)
+
+# Rule iMac B2C
+
+rule_B2CiMac <- apriori(transactions_B2C,parameter=list(supp=0.001,conf = 0.1), 
+                        appearance = list(default="rhs",lhs="iMac"))
+inspect(rule_B2CiMac)
+
+
