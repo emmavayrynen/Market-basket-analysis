@@ -43,6 +43,8 @@ Transactions <-Transactions[which(size(Transactions)!=0)]
 # Prepare Blackwell product data
 blackwellNew <- read.csv("blackwellNew.csv")
 blackwellNew <- blackwellNew[c(2,3)]
+
+View(blackwellNew)
 blackwellOld <- read.csv("blackwellOld.csv")
 blackwellOld <- blackwellOld[c(1,2)]
 
@@ -203,14 +205,20 @@ transactionSize$customerType <- ifelse(transactionSize$size.Transactions.>4, tra
 
 ggplot(transactionSize,aes(x="",fill=customerType))+
       geom_bar()+
-      coord_polar(theta = "y")
+      coord_polar(theta = "y") + labs(title="Customer base")
 
 ##########################################################
 ###             Rules by Category                       ##
 ##########################################################
 rulesCat <- apriori(Data_catsplit, parameter=list(minlen=2, support=0.001, confidence=0.4))
-TopRulesCat<-inspect(rulesCat[1:10])
+TopRulesCat<-(rulesCat[1:10])
 
+inspect(head(TopRulesCat, by="lift"))
+plotCat2 <-(head(TopRulesCat, by="lift"))
+plot(plotCat2, method = "graph", engine = "htmlwidget")
+
+
+#Laptops
 rulesCat1 <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2), 
           appearance = list(default="rhs",lhs="Laptop"))
 topTenCat<-rulesCat1[1:10]
@@ -220,7 +228,13 @@ plotCat <-(head(rulesCat1, by="lift"))
 
 plot(plotCat, method = "graph", engine = "htmlwidget")
 
-
+#Printer Ink
+rulesCatPrint <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2), 
+                    appearance = list(default="lhs",rhs="Printer Ink"))
+rulesCatPrint[1:10]
+topTenPrint<-(head(rulesCatPrint, by="lift"))
+inspect(topTenPrint)
+plot(topTenPrint, method="grouped")
 
 ##########################################################
 ###             Rules by Type of Customer               ##
