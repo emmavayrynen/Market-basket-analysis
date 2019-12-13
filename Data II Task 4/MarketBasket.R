@@ -28,8 +28,6 @@ summary(Transactions)
 
 #Visualize dataset
 itemFrequencyPlot(Transactions,topN=10, type="absolute")
-image(Transactions)
-image(sample(Transactions))
 
 # Removing transaction size 0
 
@@ -50,7 +48,7 @@ blackwellOld <- blackwellOld[c(1,2)]
 
 blackwellProductTypes <- rbind(blackwellOld, blackwellNew)
 blackwellProductTypes <- data.frame(blackwellProductTypes$ProductType, blackwellProductTypes$ProductNum)
-View(blackwellProductTypes)
+
 
 blackwellProductTypes$Company <- "Blackwell"
 colnames(blackwellProductTypes)[1] <- "Category"
@@ -58,19 +56,23 @@ colnames(blackwellProductTypes)[2] <- "Product"
 
 # Prepare Electronidex product data 
 
-productCategory$Company <- "Electronidex"
+productCategoryPlot <- read.csv("ProductCategoriesForPlot.csv")
+productCategoryPlot<- as.data.frame(productCategoryPlot)
+productCategoryPlot$Company <- "Electronidex"
 
 # Merge dataframes
 
-ProductTypes <- rbind(productCategory, blackwellProductTypes)
+ProductTypes <- rbind(productCategoryPlot, blackwellProductTypes)
 
 
 # Visually compare Blackwell and Electronidex product offering 
 
 ggplot(tally(group_by(ProductTypes, Category, Company)),aes(Category, n, fill = Category)) + 
-  geom_col() + facet_grid(Company ~ .) + theme(axis.text.x = element_text(angle = 90, hjust = 1, size =15))+
-  guides(fill=FALSE) + xlab("Products") + ylab("Count") + 
-  ggtitle("Visual Representation of Product Offering between BW and EN")
+  geom_col() + facet_grid(Company ~ .) + theme(axis.text.x = element_text(angle = 90, hjust = 0, size =12))+
+  coord_cartesian()+
+  guides(fill=FALSE) + xlab("") + ylab("Inventory Size") + 
+  ggtitle("Visual Representation of Portofolios")
+
 
 #########################################################################################
 
@@ -127,7 +129,8 @@ inspect(head(top.rules, by = "support"))
 plot(rules, measure = c("support", "lift"), shading = "confidence",jitter=10)
 plot(rules, method = "two-key plot")
 plot(top.rules, method = "grouped")
-plot (top.rules, method = "graph", engine = "htmlwidget")
+plot (NoLaptopRules[1:5]
+      , method = "graph", engine = "htmlwidget")
 
 
 #Improve by inspect model
@@ -148,30 +151,64 @@ is.redundant(top.rules) #no redundant rules
 
 # iMac Rules
 
-iMacrules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
+iMacrules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.1), 
                appearance = list(default="rhs",lhs="iMac"))
 inspect(iMacrules)
 plot (iMacrules, method = "graph", engine = "htmlwidget")
 
+# iMac no high value on rhs
+
+ruleiMacNoHighValueRhs <- subset(iMacrules ,items %!in% c("HP Laptop", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                                              "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
+                                                              "Acer Desktop","Apple MacBook Pro","HP Monitor","LG Monitor",'Acer Aspire',"ASUS Monitor",
+                                                              "ASUS Chromebook","ASUS 2 Monitor"))
+inspect(ruleiMacNoHighValueRhs)
+
 # HP laptop rules
 
-hpLaptoprules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
+hpLaptoprules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.1), 
                    appearance = list(default="rhs",lhs="HP Laptop"))
 inspect(hpLaptoprules)
-plot (hpLaptoprules, method = "graph", engine = "htmlwidget")
+
+# Hp no high values on rhs
+
+plot (ruleHpLaptopsnoLaptopsRhs, method = "graph", engine = "htmlwidget")
+
+
+ruleHpLaptopsnoLaptopsRhs <- subset(hpLaptoprules ,items %!in% c("iMac", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                                                 "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
+                                                                 "Acer Desktop","Apple MacBook Pro","HP Monitor","LG Monitor",'Acer Aspire',"ASUS Monitor",
+                                                                 "ASUS Chromebook"))
+ 
+                                                                 
+                                                                                                                                                                                         
+inspect(ruleHpLaptopsnoLaptopsRhs)
 
 # CYBERPOWER Gamer Desktop Rules
 
 CPGamingLaptoprules<-apriori(Transactions, parameter=list(supp=0.001,conf = 0.2), 
                        appearance = list(default="rhs",lhs="CYBERPOWER Gamer Desktop"))
 inspect(CPGamingLaptoprules)
-plot (CPGamingLaptoprules, method = "scatterplot", engine = "htmlwidget")
+plot (CPGamingLaptoprules, method = "graph", engine = "htmlwidget")
 
 
 # Rules without laptops
 
 rulesNoLaptops <- apriori(Transactions, parameter=list(supp=0.001,conf = 0.2),
                           appearance = items %in% "CYBERPOWER Gamer Desktop")
+
+# Rules Airpods rhs 
+
+AirpodRules <- apriori (data=Transactions, parameter=list (supp=0.01,conf = 0.1), appearance = list (default="lhs",rhs="Apple Earpods")) 
+inspect(AirpodRules)
+# Airpods on rhs high value on lhs
+
+ruleAirpodsHighValueLhs <- subset(AirpodRules ,items %in% c("iMac", "Apple MacBook Air", "CYBERPOWER Gamer Desktop", 
+                                                                 "Lenovo Desktop Computer","Dell Desktop","ViewSonic Monitor","Eluktronics Pro Gaming Laptop","Samsung Monitor",
+                                                                 "Acer Desktop","Apple MacBook Pro","HP Monitor","LG Monitor",'Acer Aspire',"ASUS Monitor",
+                                                                 "ASUS Chromebook","iPad Pro",'Apple Magic Keyboard','Apple Wireless Keyboard'))
+inspect(ruleAirpodsHighValueLhs)
+
 
 #########################################################
 ##          Split data by categories                   ##
@@ -208,6 +245,7 @@ ggplot(transactionSize,aes(x="",fill=customerType))+
 ##########################################################
 ###             Rules by Category                       ##
 ##########################################################
+<<<<<<< Updated upstream
 rulesCat <- apriori(Data_catsplit, parameter=list(minlen=2, support=0.001, confidence=0.4))
 TopRulesCat<-(rulesCat[1:10])
 
@@ -221,7 +259,19 @@ rulesCat1 <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.2),
           appearance = list(default="rhs",lhs="Laptop"))
 topTenCat<-rulesCat1[1:10]
 inspect(head(rulesCat1, by="lift"))
+=======
 
+rulesCat <- apriori(Data_catsplit, parameter=list( support=0.001, confidence=0.1))
+TopRulesCat<-inspect(rulesCat[1:10])
+
+>>>>>>> Stashed changes
+
+rulesCat1 <-apriori(Data_catsplit, parameter=list(supp=0.001,conf = 0.1), 
+          appearance = list(lhs="Laptop",rhs=""))
+inspect(rulesCat1)
+topTenCat<-rulesCat1[1:10]
+inspect(head(rulesCat1, by="conf"))
+inspect(topTenCat)
 plotCat <-(head(rulesCat1, by="lift"))
 
 plot(plotCat, method = "graph", engine = "htmlwidget")
